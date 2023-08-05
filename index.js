@@ -26,7 +26,7 @@ const prompt = new Select({
 
 const destructionConfirmation = new Confirm({
   name: "question",
-  message: "This action will overwrite existing files. Continue?",
+  message: "This action will clear existing files. Continue?",
 });
 
 const setup = async () => {
