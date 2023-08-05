@@ -3,9 +3,26 @@ const chalk = require("chalk");
 
 const timeout = (time) => new Promise((res) => setTimeout(res, time));
 
-const pause = async (callback, time) => {
-  await timeout(time);
-  callback();
+const updatePauseTime = (time, current, total) => {
+  process.stdout.clearLine(0);
+  process.stdout.cursorTo(0);
+  process.stdout.write(`… pausing for ${time}ms (${current / total}%)`);
+};
+
+const pause = (callback, time) => {
+  const fragmentCount = 10;
+  const timeFragment = time / fragmentCount;
+  let current = 0;
+  updatePauseTime(time, current, fragmentCount);
+  const interval = setInterval(() => {
+    current += 1;
+    updatePauseTime(time, current, fragmentCount);
+    if (current >= fragmentCount) {
+      clearInterval(interval);
+      process.stdout.write("\n");
+      callback();
+    }
+  }, timeFragment);
 };
 
 createFolder = (filePath) => {

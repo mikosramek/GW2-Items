@@ -2,11 +2,8 @@
 
 const { Select, Confirm } = require("enquirer");
 const axios = require("axios");
-const {
-  OUTPUT_FOLDER,
-  ID_FILE_NAME,
-  OUTPUT_FILE_NAME,
-} = require("./config.json");
+const options = require("./config.json");
+const { OUTPUT_FOLDER, ID_FILE_NAME, OUTPUT_FILE_NAME } = options;
 const { createJSONFile, Log } = require("./utils");
 const fetchItems = require("./fetchItems");
 
@@ -29,6 +26,7 @@ const destructionConfirmation = new Confirm({
   message: "This action will clear existing files. Continue?",
 });
 
+// Setup
 const setup = async () => {
   const answer = await destructionConfirmation.run();
   Log.title("\nSetting up data");
@@ -68,7 +66,7 @@ const fetchIDs = async () => {
       `ids written to file (./${OUTPUT_FOLDER}/${ID_FILE_NAME}.json)`
     );
   } catch (err) {
-    Log.failure("fetch failed");
+    Log.failure("id couldn't be fetched");
     console.error(err);
   }
 };
@@ -92,7 +90,15 @@ const clearData = async (bypassConfirmation = false) => {
   }
 };
 
-const fetchData = () => {};
+const fetchData = () => {
+  // fetch items
+  try {
+    Log.pending("fetching data");
+    fetchItems();
+  } catch (err) {
+    Log.failure("data couldn't be fetched");
+  }
+};
 
 // Options
 const viewOptions = () => {};

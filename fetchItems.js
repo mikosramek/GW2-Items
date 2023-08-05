@@ -3,19 +3,24 @@
 const axios = require("axios");
 const fs = require("fs");
 
-const { pause } = require("./utils");
-
-// TODO: use config file
-const CALLS_PER_SESSION = 50;
+const { pause, Log } = require("./utils");
+const options = require("./config.json");
+const {
+  OUTPUT_FOLDER,
+  ID_FILE_NAME,
+  OUTPUT_FILE_NAME,
+  CALLS_PER_SESSION,
+  TIMEOUT_BETWEEN_CALLS,
+  TIMEOUT_BETWEEN_ERROR,
+} = options;
 
 const handleFileData = function (data) {
-  // TODO: use config file
-  readFile("./itemNames.json", (currentItems) => {
+  readFile(`./${OUTPUT_FOLDER}/${OUTPUT_FILE_NAME}.json`, (currentItems) => {
     const itemCalls = [];
     const newItems = [];
     let lastIDIndex = parseInt(currentItems.lastIDIndex);
     const itemLimit = lastIDIndex + CALLS_PER_SESSION;
-    console.log("Going from", lastIDIndex, "to", itemLimit);
+    Log.pending(`fetching from ${lastIDIndex} to ${itemLimit}`);
     for (let i = lastIDIndex; i < itemLimit; i += 1) {
       if (i < data.length) {
         const id = data[i];
@@ -26,6 +31,8 @@ const handleFileData = function (data) {
             dataResponse: "json",
           })
         );
+      } else {
+        Log.success("all items have been fetched");
       }
     }
     lastIDIndex += CALLS_PER_SESSION;
@@ -38,18 +45,21 @@ const handleFileData = function (data) {
         });
         currentItems.items = [...currentItems.items, ...newItems];
         currentItems.lastIDIndex = lastIDIndex;
-        // TODO: use config file
         fs.writeFileSync(
-          "./itemNames.json",
+          `./${OUTPUT_FOLDER}/${OUTPUT_FILE_NAME}.json`,
           JSON.stringify(currentItems, null, 2)
         );
-        // TODO: use config file
-        pause(() => handleFileData(data), 10000);
+        Log.success(
+          `item data fetch successful - ${
+            data.length - lastIDIndex
+          } items remain`
+        );
+        pause(() => handleFileData(data), TIMEOUT_BETWEEN_CALLS);
       })
       .catch((error) => {
+        Log.failure(`failed to fetch item data, retrying (${lastIDIndex})`);
         console.error(error);
-        // TODO: use config file
-        pause(() => handleFileData(data), 20000);
+        pause(() => handleFileData(data), TIMEOUT_BETWEEN_ERROR);
       });
   });
 };
@@ -62,8 +72,7 @@ const readFile = (path, callback) => {
 };
 
 const fetchItems = () => {
-  // TODO: use config file
-  readFile("./items.json", handleFileData);
+  readFile(`./${OUTPUT_FOLDER}/${ID_FILE_NAME}.json`, handleFileData);
 };
 
 module.exports = fetchItems;
