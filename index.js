@@ -1,12 +1,13 @@
 "use strict";
 
 const { Select, Confirm } = require("enquirer");
+const axios = require("axios");
 const {
   OUTPUT_FOLDER,
   ID_FILE_NAME,
   OUTPUT_FILE_NAME,
 } = require("./config.json");
-const { createJSONFile } = require("./utils");
+const { createJSONFile, Log } = require("./utils");
 const fetchItems = require("./fetchItems");
 
 const prompt = new Select({
@@ -30,9 +31,11 @@ const destructionConfirmation = new Confirm({
 
 const setup = async () => {
   const answer = await destructionConfirmation.run();
+  Log.title("\nSetting up data");
   if (answer) {
     await clearIDs(true);
     await clearData(true);
+    Log.success("data setup");
   }
 };
 
@@ -41,27 +44,50 @@ const clearIDs = async (bypassConfirmation = false) => {
   try {
     const answer = bypassConfirmation || (await destructionConfirmation.run());
     if (answer) {
+      Log.pending("IDs being cleared");
       await createFolder(OUTPUT_FOLDER);
       await createJSONFile(`./${OUTPUT_FOLDER}/${ID_FILE_NAME}.json`, []);
+      Log.success("IDs cleared");
     }
   } catch (err) {
+    Log.failure("IDs couldn't be cleared");
     console.error(err);
   }
 };
-const fetchIDs = () => {};
+const fetchIDs = async () => {
+  try {
+    Log.pending("fetching ids");
+    const response = await axios.get("https://api.guildwars2.com/v2/items", {
+      dataResponse: "json",
+    });
+    const { data: ids } = response;
+    Log.success("ids fetched");
+    Log.pending("writing ids to file");
+    await createJSONFile(`./${OUTPUT_FOLDER}/${ID_FILE_NAME}.json`, ids);
+    Log.success(
+      `ids written to file (./${OUTPUT_FOLDER}/${ID_FILE_NAME}.json)`
+    );
+  } catch (err) {
+    Log.failure("fetch failed");
+    console.error(err);
+  }
+};
 
 // Data
 const clearData = async (bypassConfirmation = false) => {
   try {
     const answer = bypassConfirmation || (await destructionConfirmation.run());
     if (answer) {
+      Log.pending("data being cleared");
       await createFolder(OUTPUT_FOLDER);
       await createJSONFile(`./${OUTPUT_FOLDER}/${OUTPUT_FILE_NAME}.json`, {
         lastIDIndex: 0,
         items: [],
       });
+      Log.success("data cleared");
     }
   } catch (err) {
+    Log.failure("data couldn't be cleared");
     console.error(err);
   }
 };
@@ -73,6 +99,7 @@ const viewOptions = () => {};
 const updateOptions = () => {};
 
 const main = async () => {
+  console.clear();
   try {
     const action = await prompt.run();
     switch (action) {

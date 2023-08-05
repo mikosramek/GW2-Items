@@ -1,4 +1,5 @@
 const fs = require("fs");
+const chalk = require("chalk");
 
 const timeout = (time) => new Promise((res) => setTimeout(res, time));
 
@@ -25,7 +26,23 @@ createJSONFile = (filePath, data = {}) => {
   });
 };
 
+class Log {
+  pending(copy) {
+    console.log(chalk.yellow("…"), copy);
+  }
+  success(copy) {
+    console.log(chalk.green("✔"), copy);
+  }
+  failure(copy) {
+    console.log(chalk.red("𐄂"), copy);
+  }
+  title(copy) {
+    console.log(chalk.black.bgWhite(copy));
+  }
+}
+
 module.exports = {
   pause,
   createJSONFile,
+  Log: new Log(),
 };
