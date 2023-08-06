@@ -6,7 +6,7 @@ const timeout = (time) => new Promise((res) => setTimeout(res, time));
 const updatePauseTime = (time, current, total) => {
   process.stdout.clearLine(0);
   process.stdout.cursorTo(0);
-  process.stdout.write(`… pausing for ${time}ms (${current / total}%)`);
+  process.stdout.write(`… pausing for ${time}ms (${(current / total) * 100}%)`);
 };
 
 const pause = (callback, time) => {
@@ -55,6 +55,9 @@ class Log {
   }
   title(copy) {
     console.log(chalk.black.bgWhite(copy));
+  }
+  timestamp() {
+    console.log(chalk.gray(`⏰ ${new Date().toLocaleTimeString()}`));
   }
 }
 

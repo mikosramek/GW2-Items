@@ -16,31 +16,31 @@ const {
 
 const handleFileData = function (data) {
   readFile(`./${OUTPUT_FOLDER}/${OUTPUT_FILE_NAME}.json`, (currentItems) => {
-    const itemCalls = [];
     const newItems = [];
     let lastIDIndex = parseInt(currentItems.lastIDIndex);
     const itemLimit = lastIDIndex + CALLS_PER_SESSION;
     Log.pending(`fetching from ${lastIDIndex} to ${itemLimit}`);
+    Log.timestamp();
+    const ids = [];
     for (let i = lastIDIndex; i < itemLimit; i += 1) {
       if (i < data.length) {
         const id = data[i];
-        itemCalls.push(
-          axios({
-            method: "GET",
-            url: `https://api.guildwars2.com/v2/items/${id}`,
-            dataResponse: "json",
-          })
-        );
+        ids.push(id);
       } else {
         Log.success("all items have been fetched");
+        return;
       }
     }
+
     lastIDIndex += CALLS_PER_SESSION;
-    Promise.all(itemCalls)
-      .then((itemData) => {
-        itemData.forEach((response) => {
-          const { data } = response;
-          const { name, id, icon, rarity } = data;
+
+    const url = `https://api.guildwars2.com/v2/items?ids=${ids.toString()}`;
+    axios
+      .get(url)
+      .then((response) => {
+        const { data: items } = response;
+        items.forEach((item) => {
+          const { name, id, icon, rarity } = item;
           newItems.push({ name, id, icon, rarity });
         });
         currentItems.items = [...currentItems.items, ...newItems];
@@ -56,9 +56,9 @@ const handleFileData = function (data) {
         );
         pause(() => handleFileData(data), TIMEOUT_BETWEEN_CALLS);
       })
-      .catch((error) => {
+      .catch((err) => {
         Log.failure(`failed to fetch item data, retrying (${lastIDIndex})`);
-        console.error(error);
+        console.error(err);
         pause(() => handleFileData(data), TIMEOUT_BETWEEN_ERROR);
       });
   });

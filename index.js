@@ -16,8 +16,8 @@ const prompt = new Select({
     "Fetch IDs",
     "Clear data",
     "Fetch data",
-    "View options",
-    "Update options",
+    // "View options",
+    // "Update options",
   ],
 });
 
@@ -124,12 +124,12 @@ const main = async () => {
       case "Fetch data":
         fetchData();
         break;
-      case "View options":
-        viewOptions();
-        break;
-      case "Update options":
-        updateOptions();
-        break;
+      // case "View options":
+      //   viewOptions();
+      //   break;
+      // case "Update options":
+      //   updateOptions();
+      //   break;
       default:
         console.log("No valid option selected");
         break;
