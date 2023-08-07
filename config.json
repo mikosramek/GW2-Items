@@ -4,5 +4,8 @@
   "TIMEOUT_BETWEEN_ERROR": 20000,
   "OUTPUT_FOLDER": "data",
   "OUTPUT_FILE_NAME": "itemData",
-  "ID_FILE_NAME": "ids"
+  "ID_FILE_NAME": "ids",
+  "CATA_ID_FILE_NAME": "itemDataByID",
+  "CATA_NAME_FILE_NAME": "itemDataByName",
+  "CATA_RARITY_FILE_NAME": "itemDataByRarity"
 }

@@ -3,7 +3,7 @@
 const axios = require("axios");
 const fs = require("fs");
 
-const { pause, Log } = require("./utils");
+const { pause, Log, readFile } = require("./utils");
 const options = require("./config.json");
 const {
   OUTPUT_FOLDER,
@@ -61,13 +61,6 @@ const handleFileData = function (data) {
         console.error(err);
         pause(() => handleFileData(data), TIMEOUT_BETWEEN_ERROR);
       });
-  });
-};
-
-const readFile = (path, callback) => {
-  fs.readFile(path, "utf-8", (err, data) => {
-    if (err) throw err;
-    callback(JSON.parse(data));
   });
 };
 

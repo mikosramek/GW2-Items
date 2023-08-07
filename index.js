@@ -6,6 +6,7 @@ const options = require("./config.json");
 const { OUTPUT_FOLDER, ID_FILE_NAME, OUTPUT_FILE_NAME } = options;
 const { createJSONFile, Log } = require("./utils");
 const fetchItems = require("./fetchItems");
+const catalogue = require("./catalogueItems");
 
 const prompt = new Select({
   name: "action",
@@ -16,6 +17,7 @@ const prompt = new Select({
     "Fetch IDs",
     "Clear data",
     "Fetch data",
+    "Catalogue data",
     // "View options",
     // "Update options",
   ],
@@ -123,6 +125,9 @@ const main = async () => {
         break;
       case "Fetch data":
         fetchData();
+        break;
+      case "Catalogue data":
+        catalogue();
         break;
       // case "View options":
       //   viewOptions();

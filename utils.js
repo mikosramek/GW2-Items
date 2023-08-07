@@ -43,6 +43,13 @@ createJSONFile = (filePath, data = {}) => {
   });
 };
 
+const readFile = (path, callback) => {
+  fs.readFile(path, "utf-8", (err, data) => {
+    if (err) throw err;
+    callback(JSON.parse(data));
+  });
+};
+
 class Log {
   pending(copy) {
     console.log(chalk.yellow("…"), copy);
@@ -65,4 +72,5 @@ module.exports = {
   pause,
   createJSONFile,
   Log: new Log(),
+  readFile,
 };
