@@ -6,6 +6,9 @@ const {
   CATA_ID_FILE_NAME,
   CATA_NAME_FILE_NAME,
   CATA_RARITY_FILE_NAME,
+  CURRENCY_OUTPUT_FILE,
+  CATA_CURRENCY_ID_FILE_NAME,
+  CATA_CURRENCY_NAME_FILE_NAME,
 } = require("./config.json");
 const { Log, readFile, createJSONFile } = require("./utils");
 
@@ -70,38 +73,88 @@ const catalogueByRarity = async (itemData) => {
   }
 };
 
+const catalogueCurrById = async (currData) => {
+  Log.pending("Cataloging currencies by ID");
+  const ids = {};
+  currData.forEach((currency) => {
+    const { id, ...rest } = currency;
+    ids[id] = { ...rest };
+  });
+  try {
+    await createJSONFile(
+      `./${OUTPUT_FOLDER}/${CATA_CURRENCY_ID_FILE_NAME}.json`,
+      ids
+    );
+    Log.success("Currency ID catalogue success");
+  } catch (err) {
+    Log.failure("Currency ID catalogue failed");
+    console.error(err);
+  }
+};
+
+const catalogueCurrByName = async (currData) => {
+  Log.pending("Cataloging currencies by name");
+  const names = {};
+  currData.forEach((currency) => {
+    const { name, ...rest } = currency;
+    names[name] = { ...rest };
+  });
+  try {
+    await createJSONFile(
+      `./${OUTPUT_FOLDER}/${CATA_CURRENCY_NAME_FILE_NAME}.json`,
+      names
+    );
+    Log.success("Currency name catalogue success");
+  } catch (err) {
+    Log.failure("Currency name catalogue failed");
+    console.error(err);
+  }
+};
+
+const choices = {
+  ids: {
+    m: "By IDs (object)",
+    file: OUTPUT_FILE_NAME,
+    f: catalogueByID,
+  },
+  name: {
+    m: "By name (object)",
+    file: OUTPUT_FILE_NAME,
+    f: catalogueByName,
+  },
+  rarity: {
+    m: "By rarity (arrays)",
+    file: OUTPUT_FILE_NAME,
+    f: catalogueByRarity,
+  },
+  "curr-ids": {
+    m: "Currencies by IDs (object)",
+    file: CURRENCY_OUTPUT_FILE,
+    f: catalogueCurrById,
+  },
+  "curr-name": {
+    m: "Currencies by name (object)",
+    file: CURRENCY_OUTPUT_FILE,
+    f: catalogueCurrByName,
+  },
+};
+
 const prompt = new Select({
   name: "cataction",
   message: "How would you like to catalogue the data?",
-  choices: [
-    { message: "By IDs (object)", name: "ids" },
-    { message: "By name (object)", name: "name" },
-    { message: "By rarity (arrays)", name: "rarity" },
-  ],
+  choices: Object.entries(choices).map(([id, value]) => ({
+    message: value.m,
+    name: id,
+  })),
 });
 
 const catalogue = async () => {
   try {
-    readFile(
-      `./${OUTPUT_FOLDER}/${OUTPUT_FILE_NAME}.json`,
-      async (itemData) => {
-        const answer = await prompt.run();
-        switch (answer) {
-          case "ids":
-            catalogueByID(itemData);
-            break;
-          case "name":
-            catalogueByName(itemData);
-            break;
-          case "rarity":
-            catalogueByRarity(itemData);
-            break;
-          default:
-            Log.failure("choice not valid");
-            break;
-        }
-      }
-    );
+    const answer = await prompt.run();
+    const { file, f } = choices[answer];
+    readFile(`./${OUTPUT_FOLDER}/${file}.json`, async (itemData) => {
+      f(itemData);
+    });
   } catch (err) {
     Log.failure(`cannot find "./${OUTPUT_FOLDER}/${OUTPUT_FILE_NAME}.json"`);
     console.error(err);

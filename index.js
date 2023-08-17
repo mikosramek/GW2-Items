@@ -3,10 +3,12 @@
 const { Select, Confirm } = require("enquirer");
 const axios = require("axios");
 const options = require("./config.json");
-const { OUTPUT_FOLDER, ID_FILE_NAME, OUTPUT_FILE_NAME } = options;
+const { OUTPUT_FOLDER, ID_FILE_NAME, OUTPUT_FILE_NAME, CURRENCY_OUTPUT_FILE } =
+  options;
 const { createJSONFile, Log } = require("./utils");
 const fetchItems = require("./fetchItems");
 const catalogue = require("./catalogueItems");
+const fetchCurrencies = require("./currency/fetch");
 
 const prompt = new Select({
   name: "action",
@@ -17,6 +19,8 @@ const prompt = new Select({
     "Fetch IDs",
     "Clear data",
     "Fetch data",
+    "Clear currencies",
+    "Fetch currencies",
     "Catalogue data",
     // "View options",
     // "Update options",
@@ -35,6 +39,7 @@ const setup = async () => {
   if (answer) {
     await clearIDs(true);
     await clearData(true);
+    await clearCurrencies(true);
     Log.success("data setup");
   }
 };
@@ -92,6 +97,25 @@ const clearData = async (bypassConfirmation = false) => {
   }
 };
 
+// Currencies
+const clearCurrencies = async (bypassConfirmation = false) => {
+  try {
+    const answer = bypassConfirmation || (await destructionConfirmation.run());
+    if (answer) {
+      Log.pending("currency data being cleared");
+      await createFolder(OUTPUT_FOLDER);
+      await createJSONFile(
+        `./${OUTPUT_FOLDER}/${CURRENCY_OUTPUT_FILE}.json`,
+        []
+      );
+      Log.success("currency data cleared");
+    }
+  } catch (err) {
+    Log.failure("currency data couldn't be cleared");
+    console.error(err);
+  }
+};
+
 const fetchData = () => {
   // fetch items
   try {
@@ -125,6 +149,12 @@ const main = async () => {
         break;
       case "Fetch data":
         fetchData();
+        break;
+      case "Clear currencies":
+        clearCurrencies();
+        break;
+      case "Fetch currencies":
+        fetchCurrencies();
         break;
       case "Catalogue data":
         catalogue();

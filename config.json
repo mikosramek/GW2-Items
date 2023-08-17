@@ -4,8 +4,11 @@
   "TIMEOUT_BETWEEN_ERROR": 20000,
   "OUTPUT_FOLDER": "data",
   "OUTPUT_FILE_NAME": "itemData",
+  "CURRENCY_OUTPUT_FILE": "currencyData",
   "ID_FILE_NAME": "ids",
   "CATA_ID_FILE_NAME": "itemDataByID",
   "CATA_NAME_FILE_NAME": "itemDataByName",
-  "CATA_RARITY_FILE_NAME": "itemDataByRarity"
+  "CATA_RARITY_FILE_NAME": "itemDataByRarity",
+  "CATA_CURRENCY_ID_FILE_NAME": "currencyDataById",
+  "CATA_CURRENCY_NAME_FILE_NAME": "currencyDataByName"
 }
